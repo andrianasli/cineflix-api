@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: CineTix API (with Authentication)
+  version: 2.0.0
+  description: |
+    REST API untuk aplikasi bioskop CineTix.
+    Versi 2.0 menambahkan autentikasi berbasis token (Bearer Token).
+    
+    ## Cara Penggunaan
+    1. Lakukan POST /auth/register untuk membuat akun baru (atau gunakan akun default: admin/admin123)
+    2. Lakukan POST /auth/login dengan username & password → dapatkan token
+    3. Sertakan token di setiap request: `Authorization: Bearer <token>`
+    4. Token berlaku selama 24 jam
+
+servers:
+  - url: http://localhost/cineflix-api
+    description: Local development
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: HEX64
+      description: Token 64 karakter hex yang didapat dari endpoint /auth/login
+
+  schemas:
+    ErrorUnauthorized:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Token tidak valid atau sudah expired. Silakan login ulang.
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: admin123
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login berhasil
+        token:
+          type: string
+          example: a3f5c7d9e1b2...
+        expires_at:
+          type: string
+          format: date-time
+          example: "2026-05-31 10:00:00"
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register akun API baru
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '201':
+          description: Registrasi berhasil
+        '409':
+          description: Username sudah digunakan
+
+  /auth/login:
+    post:
+      summary: Login dan dapatkan token
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Username atau password salah
+
+  /auth/logout:
+    post:
+      summary: Logout dan hapus token
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout berhasil
+        '401':
+          $ref: '#/components/schemas/ErrorUnauthorized'
+
+  /films:
+    get:
+      summary: Daftar semua film
+      tags: [Films]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Tambah film baru
+      tags: [Films]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Film created
+        '401':
+          description: Unauthorized
+
+  /films/{id}:
+    get:
+      summary: Detail film
+      tags: [Films]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Film not found
+    put:
+      summary: Update film
+      tags: [Films]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    delete:
+      summary: Hapus film
+      tags: [Films]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+
+  /users:
+    get:
+      summary: Daftar semua user
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Tambah user baru
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: User created
+        '401':
+          description: Unauthorized
+
+  /schedules:
+    get:
+      summary: Daftar jadwal tayang
+      tags: [Schedules]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Tambah jadwal
+      tags: [Schedules]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Schedule created
+        '401':
+          description: Unauthorized
+
+  /bookings:
+    get:
+      summary: Daftar semua booking
+      tags: [Bookings]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Buat booking baru
+      tags: [Bookings]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Booking created
+        '401':
+          description: Unauthorized
+
+  /payments:
+    get:
+      summary: Daftar semua pembayaran
+      tags: [Payments]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+    post:
+      summary: Buat pembayaran baru
+      tags: [Payments]
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Payment created
+        '401':
+          description: Unauthorized
+
+  /statistics:
+    get:
+      summary: Statistik penjualan
+      tags: [Statistics]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
