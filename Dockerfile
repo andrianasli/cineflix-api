@@ -1,13 +1,16 @@
 FROM php:8.2-apache
 
-# Install ekstensi PDO MySQL untuk koneksi database Clever Cloud
+# 1. Install ekstensi PDO MySQL untuk database Clever Cloud
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Aktifkan mod_rewrite Apache agar routing index.php kamu berjalan lancar
+# 2. Aktifkan mod_rewrite Apache
 RUN a2enmod rewrite
 
-# Salin semua kodingan backend ke folder server utama
+# 3. KUNCI UTAMA: Paksa Apache untuk mengizinkan dan membaca file .htaccess
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+# 4. Salin semua kodingan ke folder server utama
 COPY . /var/www/html/
 
-# Buka port 80 untuk akses internet
+# 5. Buka port 80
 EXPOSE 80
