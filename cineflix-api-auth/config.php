@@ -1,13 +1,14 @@
 <?php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'db_cinetix');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// SETELAN ONLINE: Menggunakan Cloud Database Profesional Clever Cloud
+define('DB_HOST', 'bfgzuydjp7w7ugkdeuti-mysql.services.clever-cloud.com');
+define('DB_NAME', 'bfgzuydjp7w7ugkdeuti');
+define('DB_USER', 'uy9nromhsv86qros');
+define('DB_PASS', 'hPKB7WC3UgH1kO6IHkbR');
 
 function getDB() {
     try {
         $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";port=3307;dbname=" . DB_NAME . ";charset=utf8",
+            "mysql:host=" . DB_HOST . ";port=3306;dbname=" . DB_NAME . ";charset=utf8",
             DB_USER,
             DB_PASS
         );
@@ -75,6 +76,6 @@ function requireAuth() {
         exit;
     }
 
-    // Token valid — kembalikan info user (bisa digunakan di controller jika perlu)
+    // Token valid — kembalikan info user
     return $row;
 }
